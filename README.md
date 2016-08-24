@@ -10,6 +10,7 @@ This README would normally document whatever steps are necessary to get your app
 
 ### How do I get set up? ###
 The 3rdparty folder must be copied in the build folder to use haarcascades classificators
+
 * Summary of set up
 * Configuration
 * Dependencies
