@@ -141,6 +141,9 @@ int main( int argc, const char* argv[])
 	int p = 0; //number of points iterator
 	vector<Point2f> points[2*TRPOINTS];
 
+	//framerate of execution
+	double tStart;
+
 	//video selection
 	if(argc>4)
 	{
@@ -195,11 +198,11 @@ int main( int argc, const char* argv[])
 	fps = cap.get(CAP_PROP_FPS);
 	cout << "Frame per seconds: " << fps <<endl;
 	//nFrames
-	nFrames = cap.get(CAP_PROP_FRAME_COUNT);
+	nFrames = (int)cap.get(CAP_PROP_FRAME_COUNT);
 	cout << "Total frames: " << nFrames <<endl;
 	//framesize
-	frameSize.width = cap.get(CAP_PROP_FRAME_WIDTH);
-	frameSize.height = cap.get(CAP_PROP_FRAME_HEIGHT);
+	frameSize.width = (int)cap.get(CAP_PROP_FRAME_WIDTH);
+	frameSize.height = (int)cap.get(CAP_PROP_FRAME_HEIGHT);
 	if(rotation != 180 && rotation !=0)
 		swap(frameSize.width, frameSize.height);
 	grayFrame = Mat(frameSize, CV_8UC1);
@@ -213,6 +216,7 @@ int main( int argc, const char* argv[])
 	//video elaboration
 	for(int j=0; videoPos<nFrames; j++)
 	{
+		tStart = (double) getTickCount();
 		//read a frame
 		if(!cap.read(captureFrame))
 		{
@@ -220,8 +224,8 @@ int main( int argc, const char* argv[])
 			cout << cap.get(CAP_PROP_POS_FRAMES) << endl;
 			break;
 		}
-		videoPos = cap.get(CAP_PROP_POS_FRAMES);
-		cout << "frame: "<<videoPos<<"|"<<nFrames<<endl;
+		videoPos = (int)cap.get(CAP_PROP_POS_FRAMES);
+		cout << "frame: " << videoPos << "|" << nFrames << endl;
 		//angle rotation
 		rotateFrame(captureFrame, rotation);
 		//color conversion
@@ -244,7 +248,7 @@ int main( int argc, const char* argv[])
 		if(j==0 || j%subInit==0)
 		{
 			cout << "Tracker re-initialization at frame: " << videoPos << endl;
-			if(init_irisDetect(grayFrame, &haar_face, &haar_reye, &haar_leye, r_eye_c, &l_eye_c, &facePos))
+			if(init_irisDetect(grayFrame, &haar_face, &haar_reye, &haar_leye, &r_eye_c, &l_eye_c, &facePos))
 			{
 				cout << "Eyes at " << r_eye_c << " " << l_eye_c << endl;
 				initFullTracker(grayFrame, trFrame, r_eye_c, l_eye_c, facePos, window_t, prev_t, drawpoint, points, termcrit);
@@ -311,17 +315,21 @@ int main( int argc, const char* argv[])
 				rectangle(outFrame, nose_p, Scalar(0,255,0,0), 1, 8, 0);
 				rectangle(outFrame, cheek_p, Scalar(0,255,0,0), 1, 8, 0);
 				rectangle(outFrame, fore_p, Scalar(0,255,0,0), 1, 8, 0);
-				imshow("drawpoints",outFrame);
+				imshow("drawpoints", outFrame);
 				//vidOut.write(outFrame);
+			}
+
+			//wait for ESC to end the analysis
+			if(waitKey(30)==27)
+			{
+				cout << "Esc pressed" << endl;
+				break;
 			}
 		}
 
-		//wait for ESC to end the analysis
-		if(waitKey(30)==27)
-		{
-			cout << "Esc pressed" << endl;
-			break;
-		}
+		//output current framerate
+		tStart = ((double)getTickCount() - tStart) / getTickFrequency();
+		cout << "Currfps " << 1.0/tStart << endl;
 	}
 
 	cout << "video analysis completed" << endl;
