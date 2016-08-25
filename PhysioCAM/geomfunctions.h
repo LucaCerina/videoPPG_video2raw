@@ -9,6 +9,6 @@
 cv::Point2f getCenter(cv::Rect input);
 cv::Point2f getCenter(const std::vector<cv::Point2f> inputPoints);
 cv::Point2f meanPosition(cv::Mat &input);
-cv::Point2f getMidPoint(cv::Point p1,cv::Point p2);
+cv::Point2f getMidPoint(cv::Point p1, cv::Point p2);
 void rotateFrame(cv::Mat &input, int angle);
 #endif // GEOMFUNCTIONS_H

@@ -68,15 +68,15 @@ int main( int argc, const char* argv[])
 	//configuration from arguments
 	//modulus for frequency subsampling
 	int subFreq = 1;
-	if(argc > 3 && atoi(argv[3]) != 0)
+	if(argc>3 && atoi(argv[3])!=0)
 		subFreq = atoi(argv[3]);
 	//modulus for tracker reinitialization
 	int subInit = 10;
-	if(argc>2 && atoi(argv[2]) !=0)
+	if(argc>2 && atoi(argv[2])!=0)
 		subInit = atoi(argv[2]);
 	//visualization
 	int videoResp = 0;
-	if(argc >1)
+	if(argc>1)
 		videoResp = atoi(argv[1]);
 	int videoRespStep = subInit;
 
@@ -95,11 +95,11 @@ int main( int argc, const char* argv[])
 	Mat grayFrame;
 	int f_t[] = {0,0}; //use of mixChannels function instead of cvtcolor
 	//matrices used for flicker intensity reduction
-	Mat t_frame,p_frame;
+	Mat t_frame, p_frame;
 	Mat outFrame;
 
 	//face and eye detection
-	CascadeClassifier haar_face,haar_reye,haar_leye;
+	CascadeClassifier haar_face, haar_reye, haar_leye;
 	vjInit(&haar_face, &haar_reye, &haar_leye);
 	vector<Rect> faceTemp;
 	faceTemp.push_back(Rect(0,0,1,1)); //temporary ROI initialization
@@ -130,12 +130,12 @@ int main( int argc, const char* argv[])
 	Point stateCenter;
 
 	//KLT tracking
-	TermCriteria termcrit(TermCriteria::EPS|TermCriteria::COUNT,20,0.01);
+	TermCriteria termcrit(TermCriteria::EPS|TermCriteria::COUNT, 20, 0.01);
 	Rect window_t[TRPOINTS];
 	Size winSize(TRDIM,TRDIM);
 	Mat prev_t[TRPOINTS];
 	fill_n(prev_t,TRPOINTS, Mat(winSize,CV_8UC1));
-	Mat trFrame;// = Mat(Size(640,480),CV_8UC1);
+	Mat trFrame;
 	Point2f drawpoint[TRPOINTS];
 	Point2f tempPoint(0,0);
 	int p = 0; //number of points iterator
@@ -152,7 +152,7 @@ int main( int argc, const char* argv[])
 		cout << "insert video file name" << endl;
 		cin >> videoname;
 	}
-	//videoname = "C:\\Users\\Bio-tec\\Documents\\DEV\\QT\\videoprocessor\\build-PhysioCAM-Desktop_Qt_5_7_0_MSVC2015_64bit-Debug\\subject01_resp.mj2";
+	//CSV file selection
 	if(argc>5)
 	{
 		csvname = argv[5];
@@ -163,10 +163,7 @@ int main( int argc, const char* argv[])
 		cout << "insert CSV output file name" << endl;
 		cin >> csvname;
 	}
-	//csvname = "subject501_stand";
-
-	//getVidRotation(videoname);
-
+	//video rotation (handles smartphone videos)
 	int rotation = 0;
 	if(argc>6)
 	{
@@ -175,7 +172,7 @@ int main( int argc, const char* argv[])
 	else
 	{
 		cout << "insert known camera rotation" << endl;
-		cin >> rotation;//TEMPORANEO ATTENZIONE!!!!!
+		cin >> rotation;
 	}
 
 
@@ -204,17 +201,17 @@ int main( int argc, const char* argv[])
 	frameSize.width = cap.get(CAP_PROP_FRAME_WIDTH);
 	frameSize.height = cap.get(CAP_PROP_FRAME_HEIGHT);
 	if(rotation != 180 && rotation !=0)
-		swap(frameSize.width,frameSize.height);
-	grayFrame = Mat(frameSize,CV_8UC1);
-	trFrame = Mat(frameSize,CV_8UC1);
+		swap(frameSize.width, frameSize.height);
+	grayFrame = Mat(frameSize, CV_8UC1);
+	trFrame = Mat(frameSize, CV_8UC1);
 	//initialization
-	subInit = (int)nFrames/subInit;
+	subInit = (int)nFrames / subInit;
 	cout << "Tracker initialization every " << subInit << " frames" << endl;
 	//REDUNDANT reset to starting frame
-	cap.set(CAP_PROP_POS_FRAMES,0);
+	cap.set(CAP_PROP_POS_FRAMES, 0);
 
 	//video elaboration
-	for(int j=0;videoPos<nFrames; j++)
+	for(int j=0; videoPos<nFrames; j++)
 	{
 		//read a frame
 		if(!cap.read(captureFrame))
@@ -226,15 +223,15 @@ int main( int argc, const char* argv[])
 		videoPos = cap.get(CAP_PROP_POS_FRAMES);
 		cout << "frame: "<<videoPos<<"|"<<nFrames<<endl;
 		//angle rotation
-		rotateFrame(captureFrame,rotation);
+		rotateFrame(captureFrame, rotation);
 		//color conversion
-		mixChannels(&captureFrame,1,&grayFrame,1,f_t,1);
+		mixChannels(&captureFrame, 1, &grayFrame, 1, f_t, 1);
 		//flicker reduction
 		if(j>0)
 		{
 			grayFrame.copyTo(t_frame);
 			//grayFrame = 0.5*(grayFrame+p_frame);
-			grayFrame = grayFrame/2.0 +p_frame/2.0;
+			grayFrame = grayFrame/2.0 + p_frame/2.0;
 			t_frame.copyTo(p_frame);
 		}
 		else
@@ -247,10 +244,10 @@ int main( int argc, const char* argv[])
 		if(j==0 || j%subInit==0)
 		{
 			cout << "Tracker re-initialization at frame: " << videoPos << endl;
-			if(init_irisDetect(grayFrame,&haar_face,&haar_reye,&haar_leye,&r_eye_c,&l_eye_c,&facePos))
+			if(init_irisDetect(grayFrame, &haar_face, &haar_reye, &haar_leye, r_eye_c, &l_eye_c, &facePos))
 			{
 				cout << "Eyes at " << r_eye_c << " " << l_eye_c << endl;
-				initFullTracker(grayFrame,trFrame,r_eye_c,l_eye_c,facePos,window_t,prev_t,drawpoint,points,termcrit);
+				initFullTracker(grayFrame, trFrame, r_eye_c, l_eye_c, facePos, window_t, prev_t, drawpoint, points, termcrit);
 				tempPoint = Point(drawpoint[6]);
 			}
 			//initialize ROI state control
@@ -263,38 +260,38 @@ int main( int argc, const char* argv[])
 			//points update
 			for(p = 0; p<TRPOINTS*2-2; p=p+2)
 			{
-				LKTracker(grayFrame,prev_t[p/2],window_t[p/2],&points[p],&points[p+1],&drawpoint[p/2],0.003,termcrit);
+				LKTracker(grayFrame, prev_t[p/2], window_t[p/2], &points[p], &points[p+1], &drawpoint[p/2], 0.003, termcrit);
 			}
-			LKTracker(grayFrame,trFrame,window_t[6],&points[12],&points[13],&drawpoint[6],0.001,termcrit);
+			LKTracker(grayFrame, trFrame, window_t[6], &points[12], &points[13], &drawpoint[6], 0.001, termcrit);
 			//search window correction
-			for(p=0; p<TRPOINTS;p++)
+			for(p=0; p<TRPOINTS; p++)
 			{
-				window_t[p].x += Point(drawpoint[6]).x-Point(tempPoint).x;
-				window_t[p].y += Point(drawpoint[6]).y-Point(tempPoint).y;
-				window_t[p] = adjustROI(window_t[p],captureFrame.size());
+				window_t[p].x += Point(drawpoint[6]).x - Point(tempPoint).x;
+				window_t[p].y += Point(drawpoint[6]).y - Point(tempPoint).y;
+				window_t[p] = adjustROI(window_t[p], captureFrame.size());
 			}
 			tempPoint = drawpoint[6];
 		}
 
 		//update ROIs
-		nose_p = getNoseDim(Point(drawpoint[2]),Point(drawpoint[3]),facePos);
-		cheek_p = getCheekDim(Point(drawpoint[4]),Point(drawpoint[5]));
-		fore_p = getForeDim(Point(drawpoint[0]),Point(drawpoint[1]));
+		nose_p = getNoseDim(Point(drawpoint[2]), Point(drawpoint[3]), facePos);
+		cheek_p = getCheekDim(Point(drawpoint[4]), Point(drawpoint[5]));
+		fore_p = getForeDim(Point(drawpoint[0]), Point(drawpoint[1]));
 
 		//signal extraction
 		if(j%subFreq==0)
 		{
 			//color signal
-			getSignalValue(captureFrame,fore_p,&fore_avg_rgb,&fore_avg_ycc);
-			getSignalValue(captureFrame,nose_p,&nose_avg_rgb,&nose_avg_ycc);
-			getSignalValue(captureFrame,cheek_p,&cheek_avg_rgb,&cheek_avg_ycc);
+			getSignalValue(captureFrame, fore_p, &fore_avg_rgb, &fore_avg_ycc);
+			getSignalValue(captureFrame, nose_p, &nose_avg_rgb, &nose_avg_ycc);
+			getSignalValue(captureFrame, cheek_p, &cheek_avg_rgb, &cheek_avg_ycc);
 			//motion signal
 			fore_motion.push_back(getCenter(fore_p));
 			nose_motion.push_back(getCenter(nose_p));
 			cheek_motion.push_back(getCenter(cheek_p));
 			ground_motion.push_back(drawpoint[6]);
 			//update ROI state
-			updateROIState(ground_motion.back(),&motion_state,&stateCenter,&currentState);
+			updateROIState(ground_motion.back(), &motion_state, &stateCenter, &currentState);
 		}
 
 		//draw the tracking results
@@ -303,17 +300,17 @@ int main( int argc, const char* argv[])
 			if(j%videoRespStep==0)
 			{
 				grayFrame.copyTo(outFrame);
-				for(int kk=0;kk<TRPOINTS;kk++)
+				for(int kk=0; kk<TRPOINTS; kk++)
 				{
-					circle(outFrame,drawpoint[kk],3,Scalar(0,255,255,0),-1);
-					rectangle(outFrame,window_t[kk],Scalar(0,255,0,0),2,8,0);
+					circle(outFrame, drawpoint[kk], 3, Scalar(0,255,255,0), -1);
+					rectangle(outFrame, window_t[kk], Scalar(0,255,0,0), 2, 8, 0);
 				}
-				circle(outFrame,r_eye_c,2,Scalar(0,255,255,0),-1);
-				circle(outFrame,l_eye_c,2,Scalar(0,255,255,0),-1);
-				rectangle(outFrame,facePos,Scalar(0,255,0,0),1,8,0);
-				rectangle(outFrame,nose_p,Scalar(0,255,0,0),1,8,0);
-				rectangle(outFrame,cheek_p,Scalar(0,255,0,0),1,8,0);
-				rectangle(outFrame,fore_p,Scalar(0,255,0,0),1,8,0);
+				circle(outFrame, r_eye_c, 2, Scalar(0,255,255,0), -1);
+				circle(outFrame, l_eye_c, 2, Scalar(0,255,255,0), -1);
+				rectangle(outFrame, facePos, Scalar(0,255,0,0), 1, 8, 0);
+				rectangle(outFrame, nose_p, Scalar(0,255,0,0), 1, 8, 0);
+				rectangle(outFrame, cheek_p, Scalar(0,255,0,0), 1, 8, 0);
+				rectangle(outFrame, fore_p, Scalar(0,255,0,0), 1, 8, 0);
 				imshow("drawpoints",outFrame);
 				//vidOut.write(outFrame);
 			}
@@ -337,7 +334,7 @@ int main( int argc, const char* argv[])
 	cout << "Output file RGB: " << outname << endl;
 	cout << fore_avg_rgb.size() << " samples" << endl;
 	file_output.open(outname.c_str(), fstream::out);
-	for(unsigned int k=0; k< fore_avg_rgb.size();k++)
+	for(unsigned int k=0; k< fore_avg_rgb.size(); k++)
 	{
 		file_output << fore_avg_rgb[k][0] << "," << fore_avg_rgb[k][1] << "," << fore_avg_rgb[k][2] << ",";
 		file_output << nose_avg_rgb[k][0] << "," << nose_avg_rgb[k][1] << "," << nose_avg_rgb[k][2] << ",";
@@ -351,7 +348,7 @@ int main( int argc, const char* argv[])
 	cout << "Output file YCrCb: " << outname << endl;
 	cout << fore_avg_ycc.size() << " samples" << endl;
 	file_output.open(outname.c_str(), fstream::out);
-	for(unsigned int k=0; k< fore_avg_ycc.size();k++)
+	for(unsigned int k=0; k< fore_avg_ycc.size(); k++)
 	{
 		file_output << fore_avg_ycc[k][0] << "," << fore_avg_ycc[k][1] << "," << fore_avg_ycc[k][2] << ",";
 		file_output << nose_avg_ycc[k][0] << "," << nose_avg_ycc[k][1] << "," << nose_avg_ycc[k][2] << ",";
@@ -365,7 +362,7 @@ int main( int argc, const char* argv[])
 	cout << "Output file motion: " << outname << endl;
 	cout << fore_motion.size() << " samples" << endl;
 	file_output.open(outname.c_str(), fstream::out);
-	for(unsigned int k=0; k< fore_motion.size();k++)
+	for(unsigned int k=0; k< fore_motion.size(); k++)
 	{
 		file_output << fore_motion[k].x << "," << fore_motion[k].y << ",";
 		file_output << nose_motion[k].x << "," << nose_motion[k].y << ",";
@@ -374,7 +371,7 @@ int main( int argc, const char* argv[])
 		file_output << motion_state[k] << "\n";
 	}
 	file_output.close();
-	if(argc > 1 && atoi(argv[1]) == 1)
+	if(argc>1 && atoi(argv[1]) == 1)
 	{
 		destroyWindow("output");
 	}

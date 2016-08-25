@@ -1,30 +1,24 @@
 #include "trackerfunctions.h"
 #include "geomfunctions.h"
 
-void initTracker(cv::Point2f start_point,const cv::Mat &input, cv::Mat &initFrame, std::vector<cv::Point2f> *initPoints, cv::Point2f *drawpoint, cv::TermCriteria termcrit)
+void initTracker(cv::Point2f start_point, const cv::Mat &input, cv::Mat &initFrame, std::vector<cv::Point2f> *initPoints, cv::Point2f *drawpoint, cv::TermCriteria termcrit)
 {
-	cv:: Rect window = cv::Rect(start_point.x-initFrame.cols/2,start_point.y-initFrame.rows/2,
-								initFrame.cols,initFrame.rows);
-	cv::Size subPixWinSize(5,5);
-	cv::Size winSize(TRDIM,TRDIM);
+	cv:: Rect window = cv::Rect(start_point.x-initFrame.cols/2, start_point.y-initFrame.rows/2,
+								initFrame.cols, initFrame.rows);
+	cv::Size subPixWinSize(5, 5);
 	float eigenDim = 3;
 
 	input(window).copyTo(initFrame);
-	//GaussianBlur(initFrame,initFrame,Size(5,5),TRSIGMA);
 	do
 	{
 		goodFeaturesToTrack(initFrame, *initPoints, 100, 0.1, 7, cv::Mat(), eigenDim, 0, 0.04);
-		eigenDim +=2;
+		eigenDim += 2;
 	}while(initPoints->size() < 5);
 
 	cornerSubPix(initFrame, *initPoints, subPixWinSize, cv::Size(-1,-1), termcrit);
-	//cout << initPoints->size() << " " << eigenDim-2 << endl;
 
 	*drawpoint = getCenter(initPoints[0]);
-	//drawpoint->x += window.x;
-	//drawpoint->y += window.y;
 	*drawpoint += cv::Point2f(window.tl());
-	//*drawpoint = start_point;
 }
 
 void LKTracker(const cv::Mat &input, cv::Mat &initFrame, const cv::Rect window, std::vector<cv::Point2f> *initPoints,
@@ -35,20 +29,14 @@ void LKTracker(const cv::Mat &input, cv::Mat &initFrame, const cv::Rect window, 
 	std::vector<float> err;
 	std::vector<cv::Point2f> goodPoints;
 	cv::Point2f t_flow;
-	cv::Mat next_frame;// = Mat(window.size(),CV_8UC1);
+	cv::Mat next_frame;
 
 	input(window).copyTo(next_frame);
-	GaussianBlur(next_frame,next_frame,cv::Size(5,5),TRSIGMA);
-	//cout << initPoints[0] << endl;
-	cv::calcOpticalFlowPyrLK(initFrame,next_frame,*initPoints,*trackPoints,status,err,winSize,
-							 5,termcrit,0,threshold);
-	//cout << trackPoints[0] << endl;
-	/*for(int kk = 0; kk< status.size();kk++)
-  {
-	if((int)status[kk]==1)
-	  goodPoints.push_back(trackPoints[0][kk]);
-  }*/
-	for(unsigned int kk=0;kk<trackPoints->size();kk++)
+	GaussianBlur(next_frame, next_frame, cv::Size(5,5), TRSIGMA);
+	cv::calcOpticalFlowPyrLK(initFrame, next_frame,*initPoints, *trackPoints, status, err, winSize,
+							 5,termcrit, 0, threshold);
+
+	for(unsigned int kk=0; kk<trackPoints->size(); kk++)
 	{
 		goodPoints.push_back(trackPoints[0][kk]-initPoints[0][kk]);
 	}
@@ -58,35 +46,36 @@ void LKTracker(const cv::Mat &input, cv::Mat &initFrame, const cv::Rect window, 
 	//*drawpoint = getCenter(window);
 	drawpoint->x += t_flow.x + window.x;
 	drawpoint->y += t_flow.y + window.y;
-	std::swap(trackPoints[0],initPoints[0]);
+	std::swap(trackPoints[0], initPoints[0]);
 	next_frame.copyTo(initFrame);
 }
 
 bool init_irisDetect(cv::Mat &input, cv::CascadeClassifier *haar_face, cv::CascadeClassifier *haar_reye,
 					 cv::CascadeClassifier *haar_leye, cv::Point *r_eye_c, cv::Point *l_eye_c, cv::Rect *facePos)
 {
-	cv::Rect midface_r,midface_l;
+	cv::Rect midface_r, midface_l;
 	//Rect r_temp,l_temp;
 	std::vector<cv::Rect> faces;
-	std::vector<cv::Rect> reye_p,leye_p;
+	std::vector<cv::Rect> reye_p, leye_p;
 	//Mat ltempImg,rtempImg;
 	cv::Point tempeye_r = cv::Point(0,0);
 	cv::Point tempeye_l = cv::Point(0,0);
 
 	//face identification
-	haar_face->detectMultiScale(input,faces,1.2,3,cv::CASCADE_FIND_BIGGEST_OBJECT|cv::CASCADE_SCALE_IMAGE, cv::Size(30,30));
+	//ATTENTION handling just one face!
+	haar_face->detectMultiScale(input, faces, 1.2, 3, cv::CASCADE_FIND_BIGGEST_OBJECT|cv::CASCADE_SCALE_IMAGE, cv::Size(30,30));
 	std::cout << "faces size = " << faces.size() << std::endl;
 	if(faces.size() != 0)
 	{
 		*facePos = faces[0];
 		//midface positions
-		midface_r = cv::Rect(faces[0].x,faces[0].y,(int)faces[0].width/2,faces[0].height);
-		midface_l = cv::Rect(faces[0].x+(int)faces[0].width/2,faces[0].y,(int)faces[0].width/2,faces[0].height);
+		midface_r = cv::Rect(faces[0].x, faces[0].y, (int)faces[0].width/2, faces[0].height);
+		midface_l = cv::Rect(faces[0].x + (int)faces[0].width/2, faces[0].y, (int)faces[0].width/2, faces[0].height);
 		//eyes detection
-		haar_reye->detectMultiScale(input(midface_r),reye_p,1.1, 20, cv::CASCADE_FIND_BIGGEST_OBJECT|cv::CASCADE_SCALE_IMAGE, cv::Size(5,5));
-		haar_leye->detectMultiScale(input(midface_l),leye_p,1.1, 20, cv::CASCADE_FIND_BIGGEST_OBJECT|cv::CASCADE_SCALE_IMAGE, cv::Size(5,5));
+		haar_reye->detectMultiScale(input(midface_r), reye_p, 1.1, 20, cv::CASCADE_FIND_BIGGEST_OBJECT|cv::CASCADE_SCALE_IMAGE, cv::Size(5,5));
+		haar_leye->detectMultiScale(input(midface_l), leye_p, 1.1, 20, cv::CASCADE_FIND_BIGGEST_OBJECT|cv::CASCADE_SCALE_IMAGE, cv::Size(5,5));
 		//eyes position correction
-		if(reye_p.size() != 0 && leye_p.size() != 0)
+		if(reye_p.size()!=0 && leye_p.size()!=0)
 		{
 			//correction
 			reye_p[0] += midface_r.tl();
@@ -116,15 +105,15 @@ bool init_irisDetect(cv::Mat &input, cv::CascadeClassifier *haar_face, cv::Casca
 		}
 		else
 		{
-			cv::namedWindow("Set eyes manually",cv::WINDOW_NORMAL);
-			cv::imshow("Set eyes manually",input);
+			cv::namedWindow("Set eyes manually", cv::WINDOW_NORMAL);
+			cv::imshow("Set eyes manually", input);
 			do{
-				setMouseCallback("Set eyes manually",getPoint,&(*r_eye_c));
+				setMouseCallback("Set eyes manually", getPoint, &(*r_eye_c));
 				std::cout << "Select right eye, then press any key" << std::endl;
 				cv::waitKey(0);
 			}while(r_eye_c->x == 0 && r_eye_c->y == 0);
 			do{
-				setMouseCallback("Set eyes manually",getPoint,&(*l_eye_c));
+				setMouseCallback("Set eyes manually", getPoint, &(*l_eye_c));
 				std::cout << "Select left eye, then press any key" << std::endl;
 				cv::waitKey(0);
 			}while(l_eye_c->x == 0 && l_eye_c->y == 0);
@@ -143,50 +132,50 @@ void initFullTracker(cv::Mat &inputFrame, cv::Mat &trFrame, cv::Point r_eye_c, c
 	cv::Point start_point;
 	//points forehead
 	start_point.x = r_eye_c.x;
-	start_point.y = getMidPoint(r_eye_c,l_eye_c).y -0.45*abs(r_eye_c.x-l_eye_c.x);
-	window_t[0] = cv::Rect(start_point.x-prev_t[0].cols/2,start_point.y-prev_t[0].rows/2,prev_t[0].cols,prev_t[0].rows);
+	start_point.y = getMidPoint(r_eye_c, l_eye_c).y - 0.45*abs(r_eye_c.x-l_eye_c.x);
+	window_t[0] = cv::Rect(start_point.x-prev_t[0].cols/2, start_point.y-prev_t[0].rows/2, prev_t[0].cols, prev_t[0].rows);
 	prev_t[0] = inputFrame(window_t[0]);
-	initTracker(start_point,inputFrame,prev_t[0],&points[0],&drawpoint[0],termcrit);
+	initTracker(start_point, inputFrame, prev_t[0], &points[0], &drawpoint[0], termcrit);
 
 	start_point.x = l_eye_c.x;
-	start_point.y = getMidPoint(r_eye_c,l_eye_c).y -0.45*abs(r_eye_c.x-l_eye_c.x);
-	window_t[1] = cv::Rect(start_point.x-prev_t[0].cols/2,start_point.y-prev_t[0].rows/2,prev_t[0].cols,prev_t[0].rows);
+	start_point.y = getMidPoint(r_eye_c,l_eye_c).y - 0.45*abs(r_eye_c.x-l_eye_c.x);
+	window_t[1] = cv::Rect(start_point.x-prev_t[0].cols/2, start_point.y-prev_t[0].rows/2, prev_t[0].cols, prev_t[0].rows);
 	prev_t[1] = inputFrame(window_t[1]);
-	initTracker(start_point,inputFrame,prev_t[1],&points[2],&drawpoint[1],termcrit);
+	initTracker(start_point, inputFrame, prev_t[1], &points[2], &drawpoint[1], termcrit);
 
 	//points nose
-	start_point = getMidPoint(r_eye_c,l_eye_c);
+	start_point = getMidPoint(r_eye_c, l_eye_c);
 	start_point.x -= 0.18*abs(r_eye_c.x-l_eye_c.x);
-	window_t[2] = cv::Rect(start_point.x-prev_t[0].cols/2,start_point.y-prev_t[0].rows/2,prev_t[0].cols,prev_t[0].rows);
+	window_t[2] = cv::Rect(start_point.x-prev_t[0].cols/2, start_point.y-prev_t[0].rows/2, prev_t[0].cols, prev_t[0].rows);
 	prev_t[2] = inputFrame(window_t[2]);
-	initTracker(start_point,inputFrame,prev_t[2],&points[4],&drawpoint[2],termcrit);
+	initTracker(start_point, inputFrame, prev_t[2], &points[4], &drawpoint[2], termcrit);
 
 	start_point = getMidPoint(r_eye_c,l_eye_c);
 	start_point.x += 0.18*abs(r_eye_c.x-l_eye_c.x);
-	window_t[3] = cv::Rect(start_point.x-prev_t[0].cols/2,start_point.y-prev_t[0].rows/2,prev_t[0].cols,prev_t[0].rows);
+	window_t[3] = cv::Rect(start_point.x-prev_t[0].cols/2, start_point.y-prev_t[0].rows/2, prev_t[0].cols, prev_t[0].rows);
 	prev_t[3] = inputFrame(window_t[3]);
-	initTracker(start_point,inputFrame,prev_t[3],&points[6],&drawpoint[3],termcrit);
+	initTracker(start_point, inputFrame, prev_t[3], &points[6], &drawpoint[3], termcrit);
 
 	//points cheek
 	start_point = r_eye_c;
 	start_point.x -= 0.2*abs(r_eye_c.x-l_eye_c.x);
 	start_point.y += 0.4*abs(r_eye_c.x-l_eye_c.x);
-	window_t[4] = cv::Rect(start_point.x-prev_t[0].cols/2,start_point.y-prev_t[0].rows/2,prev_t[0].cols,prev_t[0].rows);
+	window_t[4] = cv::Rect(start_point.x-prev_t[0].cols/2, start_point.y-prev_t[0].rows/2, prev_t[0].cols, prev_t[0].rows);
 	prev_t[4] = inputFrame(window_t[4]);
-	initTracker(start_point,inputFrame,prev_t[4],&points[8],&drawpoint[4],termcrit);
+	initTracker(start_point, inputFrame, prev_t[4], &points[8], &drawpoint[4], termcrit);
 
 	start_point = r_eye_c;
 	start_point.x += 0.2*abs(r_eye_c.x-l_eye_c.x);
 	start_point.y += 0.4*abs(r_eye_c.x-l_eye_c.x);
-	window_t[5] = cv::Rect(start_point.x-prev_t[0].cols/2,start_point.y-prev_t[0].rows/2,prev_t[0].cols,prev_t[0].rows);
+	window_t[5] = cv::Rect(start_point.x-prev_t[0].cols/2, start_point.y-prev_t[0].rows/2, prev_t[0].cols, prev_t[0].rows);
 	prev_t[5] = inputFrame(window_t[5]);
-	initTracker(start_point,inputFrame,prev_t[5],&points[10],&drawpoint[5],termcrit);
+	initTracker(start_point, inputFrame, prev_t[5], &points[10], &drawpoint[5], termcrit);
 
 	//points central face
 	start_point = getCenter(facePos);
-	window_t[6] = cv::Rect(start_point.x-(int)(0.1*facePos.width),start_point.y-(int)(0.25*facePos.height),(int)(0.2*facePos.width),(int)(0.3333*facePos.height));
+	window_t[6] = cv::Rect(start_point.x-(int)(0.1*facePos.width), start_point.y-(int)(0.25*facePos.height), (int)(0.2*facePos.width), (int)(0.3333*facePos.height));
 	inputFrame(window_t[6]).copyTo(trFrame);
-	initTracker(getCenter(window_t[6]),inputFrame,trFrame,&points[12],&drawpoint[6],termcrit);
+	initTracker(getCenter(window_t[6]), inputFrame, trFrame, &points[12], &drawpoint[6], termcrit);
 
 	std::cout << "init completed " << std::endl;
 }
