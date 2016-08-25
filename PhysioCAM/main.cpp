@@ -143,6 +143,7 @@ int main( int argc, const char* argv[])
 
 	//framerate of execution
 	double tStart;
+	double currFps =0.0;
 
 	//video selection
 	if(argc>4)
@@ -327,9 +328,10 @@ int main( int argc, const char* argv[])
 			}
 		}
 
-		//output current framerate
+		//output mean framerate
 		tStart = ((double)getTickCount() - tStart) / getTickFrequency();
-		cout << "Currfps " << 1.0/tStart << endl;
+		currFps += 1.0/tStart;
+		cout << "Currfps " << currFps/(j+1) << endl;
 	}
 
 	cout << "video analysis completed" << endl;
