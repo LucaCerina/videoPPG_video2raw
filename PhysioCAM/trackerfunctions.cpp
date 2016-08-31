@@ -63,7 +63,7 @@ bool init_irisDetect(cv::Mat &input, cv::CascadeClassifier *haar_face, cv::Casca
 
 	//face identification
 	//ATTENTION handling just one face!
-	haar_face->detectMultiScale(input, faces, 1.2, 3, cv::CASCADE_FIND_BIGGEST_OBJECT|cv::CASCADE_SCALE_IMAGE, cv::Size(30,30));
+	haar_face->detectMultiScale(input, faces, 1.2, 3, cv::CASCADE_FIND_BIGGEST_OBJECT | cv::CASCADE_SCALE_IMAGE, cv::Size(30,30));
 	std::cout << "faces size = " << faces.size() << std::endl;
 	if(faces.size() != 0)
 	{

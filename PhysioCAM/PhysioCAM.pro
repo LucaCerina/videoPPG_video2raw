@@ -14,7 +14,8 @@ LIBS += -L/usr/local/lib -L /usr/lib -lopencv_core -lopencv_imgcodecs -lopencv_v
 }
 win32{
 INCLUDEPATH += C:\Users\Bio-tec\Documents\opencv\build\include
-LIBS += C:\Users\Bio-tec\Documents\opencv\build\x64\vc14\lib\opencv_world310d.lib
+Debug:LIBS += C:\Users\Bio-tec\Documents\opencv\build\x64\vc14\lib\opencv_world310d.lib
+Release:LIBS += C:\Users\Bio-tec\Documents\opencv\build\x64\vc14\lib\opencv_world310.lib
 }
 
 SOURCES += main.cpp \
