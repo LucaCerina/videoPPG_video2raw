@@ -185,7 +185,7 @@ int main( int argc, const char* argv[])
 	if(!cap.isOpened())
 	{
 		cout << "cannot open video file" << endl;
-		return -1;
+		return 1;
 	}
 	else
 	{
@@ -254,6 +254,11 @@ int main( int argc, const char* argv[])
 				cout << "Eyes at " << r_eye_c << " " << l_eye_c << endl;
 				initFullTracker(grayFrame, trFrame, r_eye_c, l_eye_c, facePos, window_t, prev_t, drawpoint, points, termcrit);
 				tempPoint = Point(drawpoint[6]);
+			}
+			else
+			{
+				cout << "Face or eyes could not be found." << endl;
+				break;
 			}
 			//initialize ROI state control
 			stateCenter = Point(drawpoint[6]);
@@ -334,7 +339,13 @@ int main( int argc, const char* argv[])
 		cout << "Currfps " << currFps/(j+1) << endl;
 	}
 
-	cout << "video analysis completed" << endl;
+	if(videoPos == nFrames)
+		cout << "Video analysis completed" << endl;
+	else
+	{
+		cout << "Execution ended before the last frame.  Exiting program." << endl;
+		return 1;
+	}
 
 	//CSV signal output
 	cout << "CSV file opening" << endl;

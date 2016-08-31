@@ -122,7 +122,8 @@ bool init_irisDetect(cv::Mat &input, cv::CascadeClassifier *haar_face, cv::Casca
 			return true;
 		}
 	}
-	return false;
+	else
+		return false;
 }
 
 void initFullTracker(cv::Mat &inputFrame, cv::Mat &trFrame, cv::Point r_eye_c, cv::Point l_eye_c, cv::Rect facePos,
