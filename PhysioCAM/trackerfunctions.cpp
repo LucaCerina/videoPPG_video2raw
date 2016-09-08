@@ -60,11 +60,53 @@ bool init_irisDetect(cv::Mat &input, cv::CascadeClassifier *haar_face, cv::Casca
 	//Mat ltempImg,rtempImg;
 	cv::Point tempeye_r = cv::Point(0,0);
 	cv::Point tempeye_l = cv::Point(0,0);
+	cv::Point corner1 = cv::Point(0,0);
+	cv::Point corner2 = cv::Point(0,0);
+	cv::Rect manualFace;
+	cv::Mat tempImage;
+	bool flag = false;
 
 	//face identification
 	//ATTENTION handling just one face!
 	haar_face->detectMultiScale(input, faces, 1.2, 3, cv::CASCADE_FIND_BIGGEST_OBJECT | cv::CASCADE_SCALE_IMAGE, cv::Size(30,30));
 	std::cout << "faces size = " << faces.size() << std::endl;
+	if(faces.size() == 0)
+	{
+		cv::namedWindow("Search face manually", cv::WINDOW_NORMAL);
+		cv::imshow("Search face manually", input);
+		std::cout << "If a face is not present press Esc, else press any key" << std::endl;
+		if(cv::waitKey(0) == 27)
+			return false;
+		else
+		{
+			do
+			{
+			corner1 = cv::Point(0,0);
+			corner2 = cv::Point(0,0);
+			input.copyTo(tempImage);
+			do{
+				setMouseCallback("Search face manually", getPoint, &(corner1));
+				std::cout << "Select upper left corner, then press any key" << std::endl;
+				cv::waitKey(0);
+			}while(corner1.x == 0 && corner1.y == 0);
+			do{
+				setMouseCallback("Search face manually", getPoint, &(corner2));
+				std::cout << "Select lower right corner, then press any key" << std::endl;
+				cv::waitKey(0);
+			}while(corner2.x == 0 && corner2.y == 0);
+			manualFace = cv::Rect(corner1.x, corner1.y, corner2.x - corner1.x, corner2.y - corner1.y);
+			cv::destroyWindow("Search face manually");
+			cv::namedWindow("Press enter if face is correct, else press any key", cv::WINDOW_NORMAL);
+			cv::rectangle(tempImage, manualFace, cv::Scalar(0,255,0,0), 4, 8, 0);
+			cv::imshow("Press enter if face is correct, else press any key", tempImage);
+			if(cv::waitKey(0) == 13)
+				flag = true;
+			}while(flag == false);
+			faces.push_back(manualFace);
+			cv::destroyAllWindows();
+		}
+
+	}
 	if(faces.size() != 0)
 	{
 		*facePos = faces[0];
@@ -122,8 +164,6 @@ bool init_irisDetect(cv::Mat &input, cv::CascadeClassifier *haar_face, cv::Casca
 			return true;
 		}
 	}
-	else
-		return false;
 }
 
 void initFullTracker(cv::Mat &inputFrame, cv::Mat &trFrame, cv::Point r_eye_c, cv::Point l_eye_c, cv::Rect facePos,
