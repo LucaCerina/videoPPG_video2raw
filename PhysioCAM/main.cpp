@@ -144,6 +144,7 @@ int main( int argc, const char* argv[])
 	//framerate of execution
 	double tStart;
 	double currFps =0.0;
+	double tInit;
 
 	//video selection
 	if(argc>4)
@@ -215,6 +216,7 @@ int main( int argc, const char* argv[])
 	cap.set(CAP_PROP_POS_FRAMES, 0);
 
 	//video elaboration
+	tInit = (double) getTickCount();
 	for(int j=0; videoPos<nFrames; j++)
 	{
 		tStart = (double) getTickCount();
@@ -340,7 +342,11 @@ int main( int argc, const char* argv[])
 	}
 
 	if(videoPos == nFrames)
+	{
+		tInit = ((double)getTickCount() - tInit) / getTickFrequency();
 		cout << "Video analysis completed" << endl;
+		cout << "Timing: " << tInit << " seconds." << endl;
+	}
 	else
 	{
 		cout << "Execution ended before the last frame.  Exiting program." << endl;
@@ -361,20 +367,20 @@ int main( int argc, const char* argv[])
 		file_output << nose_avg_rgb[k][0] << "," << nose_avg_rgb[k][1] << "," << nose_avg_rgb[k][2] << ",";
 		file_output << cheek_avg_rgb[k][0] << "," << cheek_avg_rgb[k][1] << "," << cheek_avg_rgb[k][2] << "\n";
 	}
-	file_output.close();
-	//YCC
-	outname.clear();
-	outname.append(csvname);
-	outname.append("_ycc.csv");
-	cout << "Output file YCrCb: " << outname << endl;
-	cout << fore_avg_ycc.size() << " samples" << endl;
-	file_output.open(outname.c_str(), fstream::out);
-	for(unsigned int k=0; k< fore_avg_ycc.size(); k++)
-	{
-		file_output << fore_avg_ycc[k][0] << "," << fore_avg_ycc[k][1] << "," << fore_avg_ycc[k][2] << ",";
-		file_output << nose_avg_ycc[k][0] << "," << nose_avg_ycc[k][1] << "," << nose_avg_ycc[k][2] << ",";
-		file_output << cheek_avg_ycc[k][0] << "," << cheek_avg_ycc[k][1] << "," << cheek_avg_ycc[k][2] << "\n";
-	}
+//	file_output.close();
+//	//YCC
+//	outname.clear();
+//	outname.append(csvname);
+//	outname.append("_ycc.csv");
+//	cout << "Output file YCrCb: " << outname << endl;
+//	cout << fore_avg_ycc.size() << " samples" << endl;
+//	file_output.open(outname.c_str(), fstream::out);
+//	for(unsigned int k=0; k< fore_avg_ycc.size(); k++)
+//	{
+//		file_output << fore_avg_ycc[k][0] << "," << fore_avg_ycc[k][1] << "," << fore_avg_ycc[k][2] << ",";
+//		file_output << nose_avg_ycc[k][0] << "," << nose_avg_ycc[k][1] << "," << nose_avg_ycc[k][2] << ",";
+//		file_output << cheek_avg_ycc[k][0] << "," << cheek_avg_ycc[k][1] << "," << cheek_avg_ycc[k][2] << "\n";
+//	}
 	file_output.close();
 	//motion record
 	outname.clear();

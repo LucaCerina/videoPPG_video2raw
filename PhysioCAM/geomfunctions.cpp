@@ -67,4 +67,25 @@ void rotateFrame(cv::Mat &input, int angle)
 	}
 	else if(angle == 180)
 		cv::flip(input, input, 1);
+	else if(angle != 0)
+	{
+		cv::Point2f pt(input.cols/2, input.rows/2);
+		cv::Mat rot = cv::getRotationMatrix2D(pt, (double)angle, 1.0);
+		cv::warpAffine(input, input, rot, cv::Size(input.cols, input.rows));
+	}
+}
+
+cv::Rect rotateRect(cv::Rect input, double angle)
+{
+	cv::Rect output;
+	cv::Point2f center = getCenter(input);
+	cv::Mat rot = cv::getRotationMatrix2D(center, angle, 1.0);
+
+	output.x = rot.at<double>(0,0)*input.x + rot.at<double>(0,1)*input.y
+			+ rot.at<double>(0,2);
+	output.x = rot.at<double>(1,0)*input.x + rot.at<double>(1,1)*input.y
+			+ rot.at<double>(1,2);
+	output.width = input.width;
+	output.height = input.height;
+	return output;
 }

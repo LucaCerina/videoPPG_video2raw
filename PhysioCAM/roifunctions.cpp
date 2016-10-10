@@ -7,6 +7,10 @@ cv::Rect adjustROI(const cv::Rect input, const cv::Size frameDim)
 		correction.x = frameDim.width - correction.width;
 	if(correction.y + correction.height > frameDim.height)
 		correction.y = frameDim.height - correction.height;
+	if(correction.x < 0)
+		correction.x = 0;
+	if(correction.y < 0 )
+		correction.y = 0;
 	return correction;
 }
 
@@ -51,20 +55,32 @@ cv::Rect getForeDim(const cv::Point c1,const cv::Point c2)
 	return fore;
 }
 
-void getSignalValue(const cv::Mat &inputRGB, const cv::Rect signalROI, std::vector<cv::Scalar> *avgRGB, std::vector<cv::Scalar> *avgYCC)
+void getSignalValue(const cv::Mat &inputRGB, cv::Rect signalROI, std::vector<cv::Scalar> *avgRGB, std::vector<cv::Scalar> *avgYCC)
 {
+	//std::cout << signalROI << std::endl;
 	cv::Scalar signalValueRGB, signalValueYCC;
 	float delta = 128.0;
 
-	//BGR to RGB
-	cv::cvtColor(inputRGB, inputRGB, cv::COLOR_BGR2RGB);
-	signalValueRGB = mean(inputRGB(signalROI));
-	//YCC conversion
-	signalValueYCC[0] = 0.29900*signalValueRGB[0] + 0.58700*signalValueRGB[1] + 0.11400*signalValueRGB[2];
-	signalValueYCC[1] = (signalValueRGB[0]-signalValueYCC[0])*0.71300 + delta;
-	signalValueYCC[2] = (signalValueRGB[2]-signalValueYCC[0])*0.56400 + delta;
-	avgRGB->push_back(signalValueRGB);
-	avgYCC->push_back(signalValueYCC);
+	// Check on ROI dimension
+	if(signalROI.width > 0 && signalROI.height > 0 )
+	{
+		// Check ROI boundaries
+		signalROI = adjustROI(signalROI, inputRGB.size());
+		//BGR to RGB
+		cv::cvtColor(inputRGB, inputRGB, cv::COLOR_BGR2RGB);
+		signalValueRGB = mean(inputRGB(signalROI));
+		//YCC conversion
+		signalValueYCC[0] = 0.29900*signalValueRGB[0] + 0.58700*signalValueRGB[1] + 0.11400*signalValueRGB[2];
+		signalValueYCC[1] = (signalValueRGB[0]-signalValueYCC[0])*0.71300 + delta;
+		signalValueYCC[2] = (signalValueRGB[2]-signalValueYCC[0])*0.56400 + delta;
+		avgRGB->push_back(signalValueRGB);
+		avgYCC->push_back(signalValueYCC);
+	}
+	else //TODO da sistemare
+	{
+		avgRGB->push_back(avgRGB->back());
+		avgYCC->push_back(avgYCC->back());
+	}
 }
 
 void updateROIState(cv::Point currentPoint, std::vector<unsigned int> *stateVector, cv::Point *stateCenter, unsigned int *currentState)

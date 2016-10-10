@@ -16,6 +16,6 @@ cv::Rect getNoseDim(const cv::Point c1, const cv::Point c2, const cv::Rect faceD
 cv::Rect getCheekDim(const cv::Point c1, const cv::Point c2);
 cv::Rect getForeDim(const cv::Point c1, const cv::Point c2);
 /*Given a frame and a ROI, output the RGB signal and the YCrCb signal */
-void getSignalValue(const cv::Mat &inputRGB, const cv::Rect signalROI, std::vector<cv::Scalar> *avgRGB, std::vector<cv::Scalar> *avgYCC);
+void getSignalValue(const cv::Mat &inputRGB, cv::Rect signalROI, std::vector<cv::Scalar> *avgRGB, std::vector<cv::Scalar> *avgYCC);
 void updateROIState(cv::Point currentPoint, std::vector<unsigned int> *stateVector, cv::Point *stateCenter, unsigned int *currentState);
 #endif // ROIFUNCTIONS_H
