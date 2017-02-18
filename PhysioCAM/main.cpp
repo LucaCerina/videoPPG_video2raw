@@ -210,7 +210,7 @@ int main( int argc, const char* argv[])
 	grayFrame = Mat(frameSize, CV_8UC1);
 	trFrame = Mat(frameSize, CV_8UC1);
 	//initialization
-	subInit = (int)nFrames / subInit;
+    subInit = 1800; //(int)nFrames / subInit; FORCED TO 1800 frames
 	cout << "Tracker initialization every " << subInit << " frames" << endl;
 	//REDUNDANT reset to starting frame
 	cap.set(CAP_PROP_POS_FRAMES, 0);
