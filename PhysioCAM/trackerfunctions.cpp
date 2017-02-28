@@ -82,11 +82,12 @@ bool init_irisDetect(cv::Mat &input, cv::CascadeClassifier *haar_face, cv::Casca
 			haar_face->detectMultiScale(input, tempFace, scale, 3, cv::CASCADE_FIND_BIGGEST_OBJECT | cv::CASCADE_SCALE_IMAGE, cv::Size(30,30));
 			if(tempFace.size() != 0)
 			{
-				cv::rectangle(tempImage, tempFace[0], cv::Scalar(0,255,0,0), 4, 8, 0);
-				cv::imshow("Press enter if face is correct, else press any key", tempImage);
-				if(cv::waitKey(0) == 13)
-					faces.push_back(tempFace[0]);
-				cv::destroyAllWindows();
+//				cv::rectangle(tempImage, tempFace[0], cv::Scalar(0,255,0,0), 4, 8, 0);
+//				cv::imshow("Press enter if face is correct, else press any key", tempImage);
+//				if(cv::waitKey(0) == 13)
+//					faces.push_back(tempFace[0]);
+//				cv::destroyAllWindows();
+                faces.push_back(tempFace[0]);
 				break;
 			}
 			scale -= 0.01;
@@ -115,39 +116,40 @@ bool init_irisDetect(cv::Mat &input, cv::CascadeClassifier *haar_face, cv::Casca
 	// If any, select face manually
 	if(faces.size() == 0)
 	{
-		cv::namedWindow("Search face manually", cv::WINDOW_AUTOSIZE);
-		cv::imshow("Search face manually", input);
-		std::cout << "If a face is not present press Esc, else press any key" << std::endl;
-		if(cv::waitKey(0) == 27)
-			return false;
-		else
-		{
-			do
-			{
-			corner1 = cv::Point(0,0);
-			corner2 = cv::Point(0,0);
-			input.copyTo(tempImage);
-			do{
-				setMouseCallback("Search face manually", getPoint, &(corner1));
-				std::cout << "Select upper left corner, then press any key" << std::endl;
-				cv::waitKey(0);
-			}while(corner1.x == 0 && corner1.y == 0);
-			do{
-				setMouseCallback("Search face manually", getPoint, &(corner2));
-				std::cout << "Select lower right corner, then press any key" << std::endl;
-				cv::waitKey(0);
-			}while(corner2.x == 0 && corner2.y == 0);
-			manualFace = cv::Rect(corner1.x, corner1.y, corner2.x - corner1.x, corner2.y - corner1.y);
-			cv::destroyWindow("Search face manually");
-			cv::namedWindow("Press enter if face is correct, else press any key", cv::WINDOW_AUTOSIZE);
-			cv::rectangle(tempImage, manualFace, cv::Scalar(0,255,0,0), 4, 8, 0);
-			cv::imshow("Press enter if face is correct, else press any key", tempImage);
-			if(cv::waitKey(0) == 13)
-				flag = true;
-			}while(flag == false);
-			faces.push_back(manualFace);
-			cv::destroyAllWindows();
-		}
+        return false;
+//		cv::namedWindow("Search face manually", cv::WINDOW_AUTOSIZE);
+//		cv::imshow("Search face manually", input);
+//		std::cout << "If a face is not present press Esc, else press any key" << std::endl;
+//		if(cv::waitKey(0) == 27)
+//			return false;
+//		else
+//		{
+//			do
+//			{
+//			corner1 = cv::Point(0,0);
+//			corner2 = cv::Point(0,0);
+//			input.copyTo(tempImage);
+//			do{
+//				setMouseCallback("Search face manually", getPoint, &(corner1));
+//				std::cout << "Select upper left corner, then press any key" << std::endl;
+//				cv::waitKey(0);
+//			}while(corner1.x == 0 && corner1.y == 0);
+//			do{
+//				setMouseCallback("Search face manually", getPoint, &(corner2));
+//				std::cout << "Select lower right corner, then press any key" << std::endl;
+//				cv::waitKey(0);
+//			}while(corner2.x == 0 && corner2.y == 0);
+//			manualFace = cv::Rect(corner1.x, corner1.y, corner2.x - corner1.x, corner2.y - corner1.y);
+//			cv::destroyWindow("Search face manually");
+//			cv::namedWindow("Press enter if face is correct, else press any key", cv::WINDOW_AUTOSIZE);
+//			cv::rectangle(tempImage, manualFace, cv::Scalar(0,255,0,0), 4, 8, 0);
+//			cv::imshow("Press enter if face is correct, else press any key", tempImage);
+//			if(cv::waitKey(0) == 13)
+//				flag = true;
+//			}while(flag == false);
+//			faces.push_back(manualFace);
+//			cv::destroyAllWindows();
+//		}
 	}
 
 	// Continue
@@ -158,8 +160,10 @@ bool init_irisDetect(cv::Mat &input, cv::CascadeClassifier *haar_face, cv::Casca
 		midface_r = cv::Rect(faces[0].x, faces[0].y, (int)faces[0].width/2, faces[0].height);
 		midface_l = cv::Rect(faces[0].x + (int)faces[0].width/2, faces[0].y, (int)faces[0].width/2, faces[0].height);
 		//eyes detection
-		haar_reye->detectMultiScale(input(midface_r), reye_p, 1.1, 20, cv::CASCADE_FIND_BIGGEST_OBJECT|cv::CASCADE_SCALE_IMAGE, cv::Size(5,5));
-		haar_leye->detectMultiScale(input(midface_l), leye_p, 1.1, 20, cv::CASCADE_FIND_BIGGEST_OBJECT|cv::CASCADE_SCALE_IMAGE, cv::Size(5,5));
+        haar_reye->detectMultiScale(input(midface_r), reye_p, 1.1, 5, cv::CASCADE_FIND_BIGGEST_OBJECT|cv::CASCADE_SCALE_IMAGE, cv::Size(3,3));
+        haar_leye->detectMultiScale(input(midface_l), leye_p, 1.1, 5, cv::CASCADE_FIND_BIGGEST_OBJECT|cv::CASCADE_SCALE_IMAGE, cv::Size(3,3));
+        std::cout << reye_p.size() << std::endl;
+        std::cout << leye_p.size() << std::endl;
 		//eyes position correction
 		if(reye_p.size()!=0 && leye_p.size()!=0)
 		{
@@ -191,26 +195,28 @@ bool init_irisDetect(cv::Mat &input, cv::CascadeClassifier *haar_face, cv::Casca
 		}
 		else
 		{
-			input.copyTo(tempImage);
-			cv::rectangle(tempImage, faces[0], cv::Scalar(0,255,0,0), 4, 8, 0);
-			cv::namedWindow("Set eyes manually", cv::WINDOW_AUTOSIZE);
-			if(reye_p.size() == 0 || leye_p.size() == 0)
-			{
-				cv::imshow("Set eyes manually", tempImage);
-				do{
-					setMouseCallback("Set eyes manually", getPoint, &(*r_eye_c));
-					std::cout << "Select right eye, then press return" << std::endl;
-					if(cv::waitKey(0) == 13);
-				}while(r_eye_c->x == 0 && r_eye_c->y == 0);
-				do{
-					setMouseCallback("Set eyes manually", getPoint, &(*l_eye_c));
-					std::cout << "Select left eye, then press return" << std::endl;
-					if(cv::waitKey(0) == 13);
-				}while(l_eye_c->x == 0 && l_eye_c->y == 0);
-			}
-			std::cout << "Right eye " << *r_eye_c << " left eye " << *l_eye_c << std::endl;
-			cv::waitKey(500);
-			cv::destroyWindow("Set eyes manually");
+//			input.copyTo(tempImage);
+//			cv::rectangle(tempImage, faces[0], cv::Scalar(0,255,0,0), 4, 8, 0);
+//			cv::namedWindow("Set eyes manually", cv::WINDOW_AUTOSIZE);
+//			if(reye_p.size() == 0 || leye_p.size() == 0)
+//			{
+//				cv::imshow("Set eyes manually", tempImage);
+//				do{
+//					setMouseCallback("Set eyes manually", getPoint, &(*r_eye_c));
+//					std::cout << "Select right eye, then press return" << std::endl;
+//					if(cv::waitKey(0) == 13);
+//				}while(r_eye_c->x == 0 && r_eye_c->y == 0);
+//				do{
+//					setMouseCallback("Set eyes manually", getPoint, &(*l_eye_c));
+//					std::cout << "Select left eye, then press return" << std::endl;
+//					if(cv::waitKey(0) == 13);
+//				}while(l_eye_c->x == 0 && l_eye_c->y == 0);
+//			}
+//			std::cout << "Right eye " << *r_eye_c << " left eye " << *l_eye_c << std::endl;
+//			cv::waitKey(500);
+//			cv::destroyWindow("Set eyes manually");
+            *r_eye_c = midface_r.tl() + cv::Point(midface_r.width/2, midface_r.height/3);
+            *l_eye_c = midface_l.tl() + cv::Point(midface_l.width/2, midface_l.height/3);
 			return true;
 		}
 	}

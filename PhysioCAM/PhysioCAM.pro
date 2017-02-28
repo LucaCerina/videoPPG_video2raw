@@ -9,7 +9,7 @@ CONFIG -= qt
 !win32{
 CONFIG += link_pkgconfig
 PKGCONFIG += opencv
-INCLUDEPATH += /usr/local/include/opencv2 /usr/include
+INCLUDEPATH += /usr/local/include/opencv2 /usr/include/
 LIBS += -L/usr/local/lib -L /usr/lib -lopencv_core -lopencv_imgcodecs -lopencv_videoio -lopencv_imgproc -lopencv_objdetect -lopencv_highgui -lavformat -lavutil
 }
 win32{
