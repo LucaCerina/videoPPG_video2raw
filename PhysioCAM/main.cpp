@@ -197,11 +197,20 @@ int main( int argc, const char* argv[])
     //TEMP VideoWriter vidOut("video prova.avi",VideoWriter::fourcc('M','J','P','G'),cap.get(CAP_PROP_FPS),grayFrame.size(),0);
 
     //obtain video info
+    //obtain number of frames
+    int j=0;
+    while(cap.read(captureFrame))
+    {
+        j++;
+    }
+    cap.release();
+    cap.open(videoname);
+    nFrames = j-1;
     //fps
     fps = cap.get(CAP_PROP_FPS);
     cout << "Frame per seconds: " << fps <<endl;
     //nFrames
-    nFrames = (int)cap.get(CAP_PROP_FRAME_COUNT);
+    //nFrames = (int)cap.get(CAP_PROP_FRAME_COUNT);
     cout << "Total frames: " << nFrames <<endl;
     //framesize
     frameSize.width = (int)cap.get(CAP_PROP_FRAME_WIDTH);
@@ -217,19 +226,19 @@ int main( int argc, const char* argv[])
     cap.set(CAP_PROP_POS_FRAMES, -1);
 
     //video elaboration
-    int j=0;
+
     tInit = (double) getTickCount();
     //for(int j=0; videoPos<nFrames; j++)
-    while(cap.read(captureFrame))
+    for(j=0; j<nFrames;j++)
     {
         tStart = (double) getTickCount();
         //read a frame
-        /*if(!cap.read(captureFrame))
+        if(!cap.read(captureFrame))
         {
             cout << "cannot read from video file" << endl;
             cout << cap.get(CAP_PROP_POS_FRAMES) << endl;
             break;
-        }*/
+        }
         videoPos = (int)cap.get(CAP_PROP_POS_FRAMES);
         cout << "frame: " << videoPos << "|" << nFrames << endl;
         //angle rotation
@@ -362,7 +371,7 @@ int main( int argc, const char* argv[])
         currFps += 1.0/tStart;
         cout << "Currfps " << currFps/(j+1) << endl;
         //progress frame
-        j++;
+        //j++;
     }
 
     //if(videoPos == nFrames)
