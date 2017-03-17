@@ -431,6 +431,10 @@ int main( int argc, const char* argv[])
         file_output << motion_state[k] << "\n";
     }
     file_output.close();
+    //output number of frames
+    file_output.open("tempFrames.txt",fstream::out);
+    file_output << nFrames;
+    file_output.close();
     if(argc>1 && atoi(argv[1]) == 1)
     {
         destroyWindow("output");
