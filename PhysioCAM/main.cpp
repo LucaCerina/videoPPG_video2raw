@@ -198,7 +198,7 @@ int main( int argc, const char* argv[])
 
     //obtain video info
     //obtain number of frames
-    int j=0;
+    int j=1;
     while(cap.read(captureFrame))
     {
         j++;
