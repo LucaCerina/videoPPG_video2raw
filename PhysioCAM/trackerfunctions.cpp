@@ -6,16 +6,27 @@ void initTracker(cv::Point2f start_point, const cv::Mat &input, cv::Mat &initFra
 	cv:: Rect window = cv::Rect(start_point.x-initFrame.cols/2, start_point.y-initFrame.rows/2,
 								initFrame.cols, initFrame.rows);
 	cv::Size subPixWinSize(5, 5);
-	float eigenDim = 3;
+	int eigenDim = 3;
+	int maxEigen[2] = {0,0};
 
 	input(window).copyTo(initFrame);
 	do
 	{
-		goodFeaturesToTrack(initFrame, *initPoints, 100, 0.1, 7, cv::Mat(), eigenDim, 0, 0.04);
+		goodFeaturesToTrack(initFrame, *initPoints, 200, 0.1, 3, cv::Mat(), eigenDim, 0, 0.04);
+		if(initPoints->size() > maxEigen[1])
+		{
+			maxEigen[0] = eigenDim;
+			maxEigen[1] = (int)initPoints->size();
+		}
 		eigenDim += 2;
-	}while(initPoints->size() < 5);
+		std::cout << "Eigendim: " << eigenDim << " size " << initPoints->size() << std::endl;
+	}while(initPoints->size() < MIN_CORNER && eigenDim < 100);
+
+	if(initPoints->size() < maxEigen[1])
+		goodFeaturesToTrack(initFrame, *initPoints, 200, 0.1, 3, cv::Mat(), maxEigen[0], 0, 0.04);
 
 	cornerSubPix(initFrame, *initPoints, subPixWinSize, cv::Size(-1,-1), termcrit);
+	//std::cout << "Corners found" << std::endl;
 
 	*drawpoint = getCenter(initPoints[0]);
 	*drawpoint += cv::Point2f(window.tl());
@@ -35,11 +46,33 @@ void LKTracker(const cv::Mat &input, cv::Mat &initFrame, const cv::Rect window, 
 	cv::calcOpticalFlowPyrLK(initFrame, next_frame,*initPoints, *trackPoints, status, err, winSize,
 							 5,termcrit, 0, threshold);
 
-	for(unsigned int kk=0; kk<trackPoints->size(); kk++)
+	unsigned int kk = 0;
+	do
 	{
+		if((0 < trackPoints[0][kk].x && trackPoints[0][kk].x < window.x) &&
+				(0 < trackPoints[0][kk].y && trackPoints[0][kk].y < window.y))
+		{
 			goodPoints.push_back(trackPoints[0][kk]-initPoints[0][kk]);
+			kk++;
+		}
+		else
+		{
+			trackPoints->erase(trackPoints[0].begin() + kk);
+			initPoints->erase(initPoints[0].begin() + kk);
+		}
+	}while(kk < trackPoints[0].size());
+
+	if(trackPoints[0].size() < THR_CORNER)
+	{
+		initTracker(cv::Point2f(window.x+window.width/2,window.y+window.height/2),
+					input, next_frame, &trackPoints[0], drawpoint, termcrit);
+		initPoints[0] = trackPoints[0];
 	}
-	t_flow = getCenter(goodPoints);
+
+	if(goodPoints.size() > 0)
+		t_flow = getCenter(goodPoints);
+	else
+		t_flow = cv::Point2f(0.0, 0.0);
 
 	*drawpoint = getCenter(initPoints[0]);
 	//*drawpoint = getCenter(window);

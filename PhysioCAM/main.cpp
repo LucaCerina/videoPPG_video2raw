@@ -210,7 +210,7 @@ int main( int argc, const char* argv[])
 	grayFrame = Mat(frameSize, CV_8UC1);
 	trFrame = Mat(frameSize, CV_8UC1);
 	//initialization
-	subInit = (int)nFrames / subInit;
+	subInit = 1800; //TODO DA SISTEMARE CON NUOVO METODO(int)nFrames / subInit;
 	cout << "Tracker initialization every " << subInit << " frames" << endl;
 	//REDUNDANT reset to starting frame
 	cap.set(CAP_PROP_POS_FRAMES, 0);
@@ -289,6 +289,7 @@ int main( int argc, const char* argv[])
 		nose_p = getNoseDim(Point(drawpoint[2]), Point(drawpoint[3]), facePos);
 		cheek_p = getCheekDim(Point(drawpoint[4]), Point(drawpoint[5]));
 		fore_p = getForeDim(Point(drawpoint[0]), Point(drawpoint[1]));
+		//cout << nose_p << " " << cheek_p << " " << fore_p << endl;
 
 		//signal extraction
 		if(j%subFreq==0)
@@ -350,7 +351,7 @@ int main( int argc, const char* argv[])
 	else
 	{
 		cout << "Execution ended before the last frame.  Exiting program." << endl;
-		return 1;
+		//return 1;
 	}
 
 	//CSV signal output

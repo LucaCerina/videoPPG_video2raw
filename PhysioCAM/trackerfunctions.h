@@ -8,9 +8,11 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 
-#define TRDIM 30 //dimension of tracking windows
+#define TRDIM 45 //dimension of tracking windows
 #define TRPOINTS 7 //# of tracking points
 #define TRSIGMA 3 //gaussian filter sigma
+#define MIN_CORNER 30
+#define THR_CORNER 10
 
 void initTracker(cv::Point2f start_point,const cv::Mat &input, cv::Mat &initFrame, std::vector<cv::Point2f> *initPoints, cv::Point2f *drawpoint, cv::TermCriteria termcrit);
 int vjInit(cv::CascadeClassifier *haar_face, cv::CascadeClassifier *haar_reye, cv::CascadeClassifier *haar_leye);
