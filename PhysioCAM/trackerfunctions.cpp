@@ -97,6 +97,7 @@ bool init_irisDetect(cv::Mat &input, cv::CascadeClassifier *haar_face, cv::Casca
 	cv::Rect manualFace;
 	cv::Mat tempImage;
 	bool flag = false;
+    int pressButton;
 
 	//face identification
 	//ATTENTION handling just one face!
@@ -113,12 +114,13 @@ bool init_irisDetect(cv::Mat &input, cv::CascadeClassifier *haar_face, cv::Casca
 			std::cout << "test scale " << scale << std::endl;
 			input.copyTo(tempImage);
 			haar_face->detectMultiScale(input, tempFace, scale, 3, cv::CASCADE_FIND_BIGGEST_OBJECT | cv::CASCADE_SCALE_IMAGE, cv::Size(30,30));
-			if(tempFace.size() != 0)
-			{
+            if(tempFace.size() != 0)
+            {
 				cv::rectangle(tempImage, tempFace[0], cv::Scalar(0,255,0,0), 4, 8, 0);
 				cv::imshow("Press enter if face is correct, else press any key", tempImage);
-				if(cv::waitKey(0) == 13)
-					faces.push_back(tempFace[0]);
+                pressButton = cv::waitKey(0);
+                if(pressButton == 13 || pressButton == 10)
+                    faces.push_back(tempFace[0]);
 				cv::destroyAllWindows();
 				break;
 			}
@@ -175,7 +177,8 @@ bool init_irisDetect(cv::Mat &input, cv::CascadeClassifier *haar_face, cv::Casca
 			cv::namedWindow("Press enter if face is correct, else press any key", cv::WINDOW_AUTOSIZE);
 			cv::rectangle(tempImage, manualFace, cv::Scalar(0,255,0,0), 4, 8, 0);
 			cv::imshow("Press enter if face is correct, else press any key", tempImage);
-			if(cv::waitKey(0) == 13)
+            pressButton = cv::waitKey();
+            if(pressButton == 13 || pressButton == 10)
 				flag = true;
 			}while(flag == false);
 			faces.push_back(manualFace);

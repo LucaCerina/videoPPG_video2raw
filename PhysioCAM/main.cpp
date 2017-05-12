@@ -70,15 +70,6 @@ int main( int argc, const char* argv[])
 	int subFreq = 1;
 	if(argc>3 && atoi(argv[3])!=0)
 		subFreq = atoi(argv[3]);
-	//modulus for tracker reinitialization
-	int subInit = 10;
-	if(argc>2 && atoi(argv[2])!=0)
-		subInit = atoi(argv[2]);
-	//visualization
-	int videoResp = 0;
-	if(argc>1)
-		videoResp = atoi(argv[1]);
-	int videoRespStep = subInit;
 
 	//info video
 	double fps=0.0;
@@ -210,8 +201,20 @@ int main( int argc, const char* argv[])
 	grayFrame = Mat(frameSize, CV_8UC1);
 	trFrame = Mat(frameSize, CV_8UC1);
 	//initialization
-	subInit = 1800; //TODO DA SISTEMARE CON NUOVO METODO(int)nFrames / subInit;
+    //modulus for tracker reinitialization
+    int subInit = 10;
+    if(argc>2 && atoi(argv[2])!=0)
+        subInit = atoi(argv[2]);
+    else
+        subInit = (int)fps * 30 / 2; //TODO DA SISTEMARE CON NUOVO METODO(int)nFrames / subInit;
 	cout << "Tracker initialization every " << subInit << " frames" << endl;
+
+    // Visualization of tracker activity
+    int videoResp = 0;
+    if(argc>1)
+        videoResp = atoi(argv[1]);
+    int videoRespStep = subInit;
+
 	//REDUNDANT reset to starting frame
 	cap.set(CAP_PROP_POS_FRAMES, 0);
 
