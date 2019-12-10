@@ -18,15 +18,15 @@ Debug:LIBS += C:\Users\Bio-tec\Documents\opencv\build\x64\vc14\lib\opencv_world3
 Release:LIBS += C:\Users\Bio-tec\Documents\opencv\build\x64\vc14\lib\opencv_world310.lib
 }
 
-SOURCES += main.cpp \
-    roifunctions.cpp \
-    geomfunctions.cpp \
-    trackerfunctions.cpp
+SOURCES += src/main.cpp \
+    src/roifunctions.cpp \
+    src/geomfunctions.cpp \
+    src/trackerfunctions.cpp
 
 HEADERS += \
-    roifunctions.h \
-    geomfunctions.h \
-    trackerfunctions.h
+    src/includes/roifunctions.h \
+    src/includes/geomfunctions.h \
+    src/includes/trackerfunctions.h
 
 DISTFILES += \
     3rdparty/haarcascade_frontalface_alt.xml \
