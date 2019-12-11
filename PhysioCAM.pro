@@ -3,14 +3,14 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-#QMAKE_CXXFLAGS = $(shell pkg-config --cflags opencv) -I /usr/local/boost_1_60_0
-#LIBS = $(shell pkg-config --libs opencv) -L/usr/local/boost_1_60_0 -L/usr/share/lintian/overrides
+QMAKE_CXXFLAGS = $(shell pkg-config --cflags opencv) -I /usr/local/boost_1_60_0
+LIBS = $(shell pkg-config --libs opencv) -L/usr/local/boost_1_60_0 -L/usr/share/lintian/overrides
 
 !win32{
 CONFIG += link_pkgconfig
 PKGCONFIG += opencv
-INCLUDEPATH += /usr/local/include/opencv2 /usr/include
-LIBS += -L/usr/local/lib -L /usr/lib -lopencv_core -lopencv_imgcodecs -lopencv_videoio -lopencv_imgproc -lopencv_objdetect -lopencv_highgui -lavformat -lavutil
+INCLUDEPATH += /usr/local/include/opencv2 ./src/includes
+LIBS += -L/usr/local/lib -lopencv_core -lopencv_imgcodecs -lopencv_videoio -lopencv_imgproc -lopencv_objdetect -lopencv_highgui -lavformat -lavutil
 }
 win32{
 INCLUDEPATH += C:\Users\Bio-tec\Documents\opencv\build\include
